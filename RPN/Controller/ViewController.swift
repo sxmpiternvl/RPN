@@ -38,41 +38,12 @@ class ViewController: UIViewController {
     
     @objc func buttonTapped(_ sender: UIButton) {
         guard let title = sender.currentTitle,
-              let button = Button(rawValue: title) else { return }
-        handleButton(button)
+              let button = ButtonTitle(rawValue: title) else { return }
+        logic.handleInput(button)
         updateDisplay()
     }
-
-    private func handleButton(_ button: Button) {
-        switch button {
-        case .allClear:
-            logic.handleInput(.allClear)
-        case .backspace:
-            logic.handleInput(.backspace)
-        case .openParenthesis:
-            logic.handleInput(.openParenthesis)
-        case .closeParenthesis:
-            logic.handleInput(.closeParenthesis)
-        case .divide:
-            logic.handleInput(.divide)
-        case .multiply:
-            logic.handleInput(.multiply)
-        case .subtract:
-            logic.handleInput(.subtract)
-        case .add:
-            logic.handleInput(.add)
-        case .decimalSeparator:
-            logic.handleInput(.decimalSeparator)
-        case .equals:
-            logic.handleInput(.equals)
-        case .zero, .one, .two, .three, .four, .five, .six, .seven, .eight, .nine:
-            logic.handleInput(button)
-        case .power:
-            logic.handleInput(.power)
-        }
-    }
-
-        private func updateDisplay() {
+    
+    private func updateDisplay() {
         let expression = logic.getExpressionText()
         let fontSize: CGFloat = (expression == "Не определено") ? 46 : 58
         let font = UIFont.systemFont(ofSize: fontSize, weight: .medium)

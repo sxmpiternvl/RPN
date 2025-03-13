@@ -14,7 +14,7 @@ class CalculatorLogic {
     func getExpressionText() -> String {
         switch state {
         case .empty:
-            return Button.zero.rawValue
+            return ButtonTitle.zero.rawValue
         case .normal(let expression):
             return expression
         case .undefined:
@@ -24,22 +24,22 @@ class CalculatorLogic {
         }
     }
     
-    func handleInput(_ button: Button) {
+    func handleInput(_ button: ButtonTitle) {
         switch button {
         case .zero, .one, .two, .three, .four, .five, .six, .seven, .eight, .nine:
             addDigit(button.rawValue)
         case .decimalSeparator:
             addDecimalPoint()
         case .add:
-            addOperator(Button.add.rawValue)
+            addOperator(ButtonTitle.add.rawValue)
         case .subtract:
-            addOperator(Button.subtract.rawValue)
+            addOperator(ButtonTitle.subtract.rawValue)
         case .multiply:
-            addOperator(Button.multiply.rawValue)
+            addOperator(ButtonTitle.multiply.rawValue)
         case .divide:
-            addOperator(Button.divide.rawValue)
+            addOperator(ButtonTitle.divide.rawValue)
         case .power:
-            addOperator(Button.power.rawValue)
+            addOperator(ButtonTitle.power.rawValue)
         case .openParenthesis:
             addOpenParenthesis()
         case .closeParenthesis:
@@ -65,22 +65,23 @@ class CalculatorLogic {
         case .undefined, .empty, .result(_):
             state = .normal(digit)
         case .normal(let expression):
-            let newExpr = (expression == Button.zero.rawValue) ? digit : (expression + digit)
-            state = .normal(newExpr)
-        }
+            if digit == ButtonTitle.zero.rawValue {
+                let newExpr = (expression == ButtonTitle.zero.rawValue) ? digit : (expression + digit)
+                state = .normal(newExpr)
+            }}
     }
     
     // MARK: addDecimal
     private func addDecimalPoint() {
         switch state {
         case .undefined, .empty, .result(_):
-            state = .normal(Button.zero.rawValue + Button.decimalSeparator.rawValue)
+            state = .normal(ButtonTitle.zero.rawValue + ButtonTitle.decimalSeparator.rawValue)
         case .normal(let expr):
-            if !currentNumberContainsDecimal(expr) {
-                if let last = expr.last, last == "(" || ((Button(rawValue: String(last))?.isOperator) == true) {
-                    state = .normal(expr + Button.zero.rawValue + Button.decimalSeparator.rawValue)
+            if !expr.contains(ButtonTitle.decimalSeparator.rawValue) {
+                if let last = expr.last, last == "(" || ((ButtonTitle(rawValue: String(last))?.isOperator) == true) {
+                    state = .normal(expr + ButtonTitle.zero.rawValue + ButtonTitle.decimalSeparator.rawValue)
                 } else {
-                    state = .normal(expr + Button.decimalSeparator.rawValue)
+                    state = .normal(expr + ButtonTitle.decimalSeparator.rawValue)
                 }
             }
         }
@@ -90,9 +91,9 @@ class CalculatorLogic {
     private func addOperator(_ op: String) {
         switch state {
         case .undefined:
-            state = .normal(Button.zero.rawValue + op)
+            state = .normal(ButtonTitle.zero.rawValue + op)
         case .empty:
-            state = (op == Button.subtract.rawValue) ? .normal(Button.subtract.rawValue) : .normal(Button.zero.rawValue + op)
+            state = (op == ButtonTitle.subtract.rawValue) ? .normal(ButtonTitle.subtract.rawValue) : .normal(ButtonTitle.zero.rawValue + op)
         case .result(let val):
             state = .normal(val + op)
         case .normal(var expr):
@@ -101,8 +102,8 @@ class CalculatorLogic {
                 state = .normal(expr)
                 return
             }
-            if last == Character(Button.openParenthesis.rawValue) {
-                if op == Button.subtract.rawValue {
+            if last == Character(ButtonTitle.openParenthesis.rawValue) {
+                if op == ButtonTitle.subtract.rawValue {
                     expr += op
                     state = .normal(expr)
                 }
@@ -113,9 +114,9 @@ class CalculatorLogic {
                 state = .normal(expr)
                 return
             }
-            if expr.hasSuffix(Button.multiply.rawValue + Button.subtract.rawValue) ||
-               expr.hasSuffix(Button.divide.rawValue + Button.subtract.rawValue) {
-                if op == Button.subtract.rawValue {
+            if expr.hasSuffix(ButtonTitle.multiply.rawValue + ButtonTitle.subtract.rawValue) ||
+                expr.hasSuffix(ButtonTitle.divide.rawValue + ButtonTitle.subtract.rawValue) {
+                if op == ButtonTitle.subtract.rawValue {
                     return
                 } else {
                     expr.removeLast(2)
@@ -124,26 +125,26 @@ class CalculatorLogic {
                     return
                 }
             }
-            if ((Button(rawValue: String(last))?.isOperator) != nil) {
-                if (last == Character(Button.multiply.rawValue) ||
-                    last == Character(Button.divide.rawValue) ||
-                    last == Character(Button.power.rawValue))
-                    && op == Button.subtract.rawValue {
+            if ((ButtonTitle(rawValue: String(last))?.isOperator) == true) {
+                if (last == Character(ButtonTitle.multiply.rawValue) ||
+                    last == Character(ButtonTitle.divide.rawValue) ||
+                    last == Character(ButtonTitle.power.rawValue))
+                    && op == ButtonTitle.subtract.rawValue {
                     expr += op
                     state = .normal(expr)
                     return
                 }
                 if expr.count >= 2 {
                     let lastTwo = expr.suffix(2)
-                    if lastTwo.first == Character(Button.openParenthesis.rawValue) &&
-                        lastTwo.last == Character(Button.subtract.rawValue) &&
-                        op != Button.subtract.rawValue {
+                    if lastTwo.first == Character(ButtonTitle.openParenthesis.rawValue) &&
+                        lastTwo.last == Character(ButtonTitle.subtract.rawValue) &&
+                        op != ButtonTitle.subtract.rawValue {
                         expr.removeLast()
                         state = .normal(expr)
                         return
                     }
                 }
-                expr = String(expr.dropLast())
+                expr.removeLast()
                 expr += op
                 state = .normal(expr)
                 return
@@ -157,16 +158,16 @@ class CalculatorLogic {
     private func addOpenParenthesis() {
         switch state {
         case .undefined, .empty, .result(_):
-            state = .normal(Button.openParenthesis.rawValue)
+            state = .normal(ButtonTitle.openParenthesis.rawValue)
             openParenthesisCount = 1
         case .normal(var expr):
-            if let last = expr.last, last.isNumber || last == Character(Button.closeParenthesis.rawValue) {
-                expr.append(Button.multiply.rawValue)
-                expr.append(Button.openParenthesis.rawValue)
-            } else if expr == Button.zero.rawValue {
-                expr = Button.openParenthesis.rawValue
+            if let last = expr.last, last.isNumber || last == Character(ButtonTitle.closeParenthesis.rawValue) {
+                expr.append(ButtonTitle.multiply.rawValue)
+                expr.append(ButtonTitle.openParenthesis.rawValue)
+            } else if expr == ButtonTitle.zero.rawValue {
+                expr = ButtonTitle.openParenthesis.rawValue
             } else {
-                expr.append(Button.openParenthesis.rawValue)
+                expr.append(ButtonTitle.openParenthesis.rawValue)
             }
             openParenthesisCount += 1
             state = .normal(expr)
@@ -180,38 +181,13 @@ class CalculatorLogic {
         case .undefined, .empty, .result(_):
             return
         case .normal(var expr):
-            if let last = expr.last, last == Character(Button.openParenthesis.rawValue) || ((Button(rawValue: String(last))?.isOperator) == true) {
+            if let last = expr.last, last == Character(ButtonTitle.openParenthesis.rawValue) || ((ButtonTitle(rawValue: String(last))?.isOperator) == true) {
                 return
             }
-            expr.append(Button.closeParenthesis.rawValue)
+            expr.append(ButtonTitle.closeParenthesis.rawValue)
             openParenthesisCount -= 1
             state = .normal(expr)
         }
-    }
-    
-    // MARK: - evaluate
-    private func evaluateExpression() {
-        guard case .normal(let expr) = state else { return }
-        guard expr.filter({ $0.isNumber }).count >= 2 else { return }
-        
-        var expressionToEvaluate = expr
-        if let last = expressionToEvaluate.last, Button(rawValue: String(last))?.isOperator == true {
-            expressionToEvaluate.removeLast()
-        }
-        if openParenthesisCount > 0 {
-            expressionToEvaluate.append(String(repeating: Button.closeParenthesis.rawValue, count: openParenthesisCount))
-            openParenthesisCount = 0
-        }
-        print("Infix expression: \(expressionToEvaluate)")
-                let normalized = RPNConverter.normalize(expressionToEvaluate)
-                let rpn = RPNConverter.infixToRPN(normalized)
-//                let resultVal = RPNEvaluator.evaluate(rpn)
-                
-//                if resultVal.isNaN {
-//                    state = .undefined
-//                } else {
-//                    state = .result(stringFromRoundedNumber(resultVal, toPlaces: 8))
-//                }
     }
     
     // MARK:  Backspace
@@ -225,7 +201,7 @@ class CalculatorLogic {
                 state = .empty
             } else {
                 let removed = expr.removeLast()
-                if removed == Character(Button.openParenthesis.rawValue) {
+                if removed == Character(ButtonTitle.openParenthesis.rawValue) {
                     openParenthesisCount = max(openParenthesisCount - 1, 0)
                 }
                 state = expr.isEmpty ? .empty : .normal(expr)
@@ -233,21 +209,34 @@ class CalculatorLogic {
         }
     }
     
-    // MARK: decimal
-    private func currentNumberContainsDecimal(_ expression: String) -> Bool {
-        var currentNumber = ""
-        for char in expression.reversed() {
-            if (Button(rawValue: String(char))?.isOperator == true) {
-                break
-            }
-            currentNumber = String(char) + currentNumber
+    
+    // MARK: - evaluate
+    private func evaluateExpression() {
+        guard case .normal(let expr) = state else { return }
+        guard expr.filter({ $0.isNumber }).count >= 2 else { return }
+        
+        var expressionToEvaluate = expr
+        if let last = expressionToEvaluate.last, ButtonTitle(rawValue: String(last))?.isOperator == true {
+            expressionToEvaluate.removeLast()
         }
-        return currentNumber.contains(Button.decimalSeparator.rawValue)
+        if openParenthesisCount > 0 {
+            expressionToEvaluate.append(String(repeating: ButtonTitle.closeParenthesis.rawValue, count: openParenthesisCount))
+            openParenthesisCount = 0
+        }
+        print("Infix expression: \(expressionToEvaluate)")
+        let replaced = RPNConverter.replace(expressionToEvaluate)
+        let rpn = RPNConverter.infixToRPN(replaced)
+        let resultVal = RPNEvaluator.evaluate(rpn)
+        
+        if resultVal.isNaN {
+            state = .undefined
+        } else {
+            state = .result(stringFromRoundedNumber(resultVal, toPlaces: 8))
+        }
     }
+    
+    
 }
-
-
-//  2034.2398298     8
 
 
 

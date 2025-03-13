@@ -1,4 +1,4 @@
-enum Button: String, CaseIterable {
+enum ButtonTitle: String, CaseIterable {
     case zero = "0"
     case one = "1"
     case two = "2"

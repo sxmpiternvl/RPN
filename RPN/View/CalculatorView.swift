@@ -5,7 +5,6 @@ class CalculatorView: UIView {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.alignment = .fill
-//        stack.distribution = .fill
         stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
