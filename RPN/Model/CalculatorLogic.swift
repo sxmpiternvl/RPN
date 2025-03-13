@@ -65,6 +65,11 @@ class CalculatorLogic {
         case .undefined, .empty, .result(_):
             state = .normal(digit)
         case .normal(let expression):
+            if digit == Button.zero.rawValue {
+                if let last = expression.last, last == "0" {
+                    return
+                }
+            }
             let newExpr = (expression == Button.zero.rawValue) ? digit : (expression + digit)
             state = .normal(newExpr)
         }
