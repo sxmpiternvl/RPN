@@ -68,7 +68,11 @@ class CalculatorLogic {
             if digit == ButtonTitle.zero.rawValue {
                 let newExpr = (expression == ButtonTitle.zero.rawValue) ? digit : (expression + digit)
                 state = .normal(newExpr)
-            }}
+            }
+            else {
+                state = .normal(expression + digit)
+            }
+        }
     }
     
     // MARK: addDecimal
